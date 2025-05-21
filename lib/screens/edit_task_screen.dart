@@ -12,26 +12,31 @@ class EditTaskScreen extends StatefulWidget {
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
   final _formKey = GlobalKey<FormState>();
-  late String _title;
-  late String _description;
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
 
   @override
   void initState() {
     super.initState();
-    _title = widget.task.title;
-    _description = widget.task.description;
+    _titleController = TextEditingController(text: widget.task.title);
+    _descriptionController =
+        TextEditingController(text: widget.task.description);
   }
 
-  void _saveTask() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
+  void _saveChanges() {
+    if (_formKey.currentState!.validate()) {
       final updatedTask = Task(
-        title: _title,
-        description: _description,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
         isDone: widget.task.isDone,
       );
-
       Navigator.pop(context, updatedTask);
     }
   }
@@ -44,48 +49,37 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              // Campo Título
               TextFormField(
-                initialValue: _title,
+                controller: _titleController,
                 decoration: const InputDecoration(
                   labelText: 'Título',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Digite um título'
-                    : null,
-                onSaved: (value) => _title = value!,
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Informe um título' : null,
               ),
-              const SizedBox(height: 16),
-
-              // Campo Descrição
+              const SizedBox(height: 20),
               TextFormField(
-                initialValue: _description,
+                controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Descrição',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
-                onSaved: (value) => _description = value ?? '',
               ),
               const Spacer(),
-
-              // Botão Salvar
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _saveTask,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Salvar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    minimumSize: const Size.fromHeight(50),
-                  ),
+              ElevatedButton.icon(
+                onPressed: _saveChanges,
+                icon: const Icon(Icons.save),
+                label: const Text('Salvar Alterações'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  minimumSize: const Size.fromHeight(50),
                 ),
               ),
             ],
