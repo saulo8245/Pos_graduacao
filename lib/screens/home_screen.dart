@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../controllers/task_controller.dart';
 import '../models/task.dart';
 import '../screens/add_task_screen.dart';
-import '../screens/edit_task_screen.dart';
+import '../utils/navigation_helpers.dart';
 import '../utils/show_confirmation_dialog.dart';
+import '../utils/show_task_details.dart';
 import '../widgets/bottom_nav_bar.dart';
-import '../widgets/task_popup.dart';
 import '../widgets/task_tile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,9 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
 
+  final TaskController taskController = TaskController();
+
   int _selectedIndex = 0;
 
-  /// Navegar para adicionar tarefa
+  /// Navegação pelo bottom
   Future<void> _onNavTapped(int index) async {
     setState(() => _selectedIndex = index);
 
@@ -47,89 +50,19 @@ class _HomeScreenState extends State<HomeScreen> {
           tasks.add(newTask);
         });
 
-        await showConfirmationDialog(
+        showConfirmationDialog(
           context,
-          title: 'Sucesso',
-          message: 'Tarefa adicionada com sucesso!',
+          title: 'Tarefa adicionada',
+          message: 'Sua tarefa foi adicionada com sucesso.',
         );
       }
     } else if (index == 2) {
-      await showConfirmationDialog(
+      showConfirmationDialog(
         context,
         title: 'Configurações',
         message: 'Tela de configurações em desenvolvimento.',
       );
     }
-  }
-
-  /// Alternar concluído/pendente
-  void _toggleTaskDone(int index) {
-    setState(() {
-      tasks[index].isDone = !tasks[index].isDone;
-    });
-  }
-
-  /// Navegar para editar
-  Future<void> _navigateToEditTask(Task task) async {
-    final updatedTask = await Navigator.push<Task>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditTaskScreen(task: task),
-      ),
-    );
-
-    if (updatedTask != null) {
-      setState(() {
-        final index = tasks.indexOf(task);
-        if (index != -1) {
-          tasks[index] = updatedTask;
-        }
-      });
-
-      await showConfirmationDialog(
-        context,
-        title: 'Tarefa Atualizada',
-        message: 'A tarefa foi atualizada com sucesso!',
-      );
-    }
-  }
-
-  /// Abrir detalhes da tarefa
-  void _showTaskDetails(Task task) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return TaskPopup(
-          task: task,
-          onToggleStatus: () {
-            setState(() {
-              task.isDone = !task.isDone;
-            });
-            Navigator.pop(context);
-          },
-          onDelete: () async {
-            setState(() {
-              tasks.remove(task);
-            });
-            Navigator.pop(context);
-
-            await showConfirmationDialog(
-              context,
-              title: 'Tarefa Deletada',
-              message: 'A tarefa foi deletada com sucesso!',
-            );
-          },
-          onUpdate: () {
-            Navigator.pop(context);
-            _navigateToEditTask(task);
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -159,8 +92,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   final task = tasks[index];
                   return TaskTile(
                     task: task,
-                    onTapLeft: () => _toggleTaskDone(index),
-                    onTapRight: () => _showTaskDetails(task),
+                    onTapLeft: () {
+                      setState(() {
+                        taskController.toggleTaskDone(task);
+                      });
+                    },
+                    onTapRight: () {
+                      showTaskDetails(
+                        context: context,
+                        task: task,
+                        onToggleStatus: () {
+                          setState(() {
+                            taskController.toggleTaskDone(task);
+                          });
+                        },
+                        onDelete: () {
+                          setState(() {
+                            taskController.deleteTask(tasks, task);
+                          });
+                        },
+                        onUpdate: () {
+                          navigateToEditTask(
+                            context: context,
+                            task: task,
+                            onUpdate: (updatedTask) {
+                              setState(() {
+                                taskController.updateTask(
+                                    tasks, task, updatedTask);
+                              });
+                              showConfirmationDialog(
+                                context,
+                                title: 'Tarefa atualizada',
+                                message:
+                                    'Sua tarefa foi atualizada com sucesso.',
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
                   );
                 },
               ),
