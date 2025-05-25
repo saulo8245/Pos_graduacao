@@ -11,9 +11,8 @@ class EditTaskScreen extends StatefulWidget {
 }
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _titleController;
-  late final TextEditingController _descriptionController;
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
 
   @override
   void initState() {
@@ -30,15 +29,21 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     super.dispose();
   }
 
-  void _saveChanges() {
-    if (_formKey.currentState!.validate()) {
-      final updatedTask = Task(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        isDone: widget.task.isDone,
+  void _saveTask() {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('O título não pode ser vazio')),
       );
-      Navigator.pop(context, updatedTask);
+      return;
     }
+
+    final updatedTask = Task(
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      isDone: widget.task.isDone,
+    );
+
+    Navigator.pop(context, updatedTask);
   }
 
   @override
@@ -49,41 +54,38 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Título',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Informe um título' : null,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Título',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Descrição',
+                border: OutlineInputBorder(),
               ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: _saveChanges,
-                icon: const Icon(Icons.save),
-                label: const Text('Salvar Alterações'),
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveTask,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
-                  minimumSize: const Size.fromHeight(50),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: const Text('Salvar Alterações'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

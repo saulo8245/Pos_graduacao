@@ -1,76 +1,96 @@
 import 'package:flutter/material.dart';
 import '../models/task.dart';
-import '../screens/edit_task_screen.dart';
 
 class TaskPopup extends StatelessWidget {
   final Task task;
+  final VoidCallback onToggleStatus;
   final VoidCallback onDelete;
-  final ValueChanged<Task> onUpdate;
-  final VoidCallback onConfirm;
+  final VoidCallback onUpdate;
 
   const TaskPopup({
     super.key,
     required this.task,
+    required this.onToggleStatus,
     required this.onDelete,
     required this.onUpdate,
-    required this.onConfirm,
   });
-
-  Future<void> _editTask(BuildContext context) async {
-    final updatedTask = await Navigator.push<Task>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditTaskScreen(task: task),
-      ),
-    );
-
-    if (updatedTask != null) {
-      onUpdate(updatedTask);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Detalhes da Tarefa'),
-      content: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Indicador visual
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // Título
           Text(
             task.title,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 8),
+
+          // Descrição
           Text(
-            task.description.isNotEmpty ? task.description : 'Sem descrição',
+            task.description,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Botões de ação
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: onToggleStatus,
+                icon: Icon(
+                  task.isDone ? Icons.close : Icons.check,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  task.isDone
+                      ? 'Marcar como Pendente'
+                      : 'Marcar como Concluída',
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: task.isDone ? Colors.orange : Colors.green,
+                ),
+              ),
+              IconButton(
+                onPressed: onUpdate,
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                tooltip: 'Editar',
+              ),
+              IconButton(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Deletar',
+              ),
+            ],
           ),
         ],
       ),
-      actions: [
-        // Botão Editar
-        TextButton.icon(
-          onPressed: () => _editTask(context),
-          icon: const Icon(Icons.edit, color: Colors.blue),
-          label: const Text('Editar'),
-        ),
-
-        // Botão Deletar
-        TextButton.icon(
-          onPressed: onDelete,
-          icon: const Icon(Icons.delete, color: Colors.red),
-          label: const Text('Deletar'),
-        ),
-
-        // Botão Confirmar (apenas para exemplo, pode ser removido)
-        TextButton(
-          onPressed: onConfirm,
-          child: const Text('OK'),
-        ),
-      ],
     );
   }
 }
