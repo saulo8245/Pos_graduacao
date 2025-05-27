@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'screens/home_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'routes/app_router.dart';
+import 'routes/app_routes.dart';
 
 void main() {
-  runApp(const TaskApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class TaskApp extends StatelessWidget {
-  const TaskApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +20,11 @@ class TaskApp extends StatelessWidget {
       title: 'Lista de Tarefas',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        textTheme: GoogleFonts.poppinsTextTheme(),
+        primarySwatch: Colors.deepPurple,
         useMaterial3: true,
       ),
-      home: HomeScreen(),
+      initialRoute: AppRoutes.home,
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }
