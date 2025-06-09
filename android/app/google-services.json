@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "549197965114",
+    "project_id": "posgraduacao-c41c2",
+    "storage_bucket": "posgraduacao-c41c2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549197965114:android:7a67439689dbff6e0f9203",
+        "android_client_info": {
+          "package_name": "br.com.sauloSB.lista_tarefas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_8PQlf54-O0GpnaQrwdg9m-fjC4_tfsE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

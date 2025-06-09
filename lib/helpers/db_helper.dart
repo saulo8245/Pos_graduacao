@@ -10,19 +10,29 @@ class DBHelper {
     final dbPath = await getDatabasesPath();
     return openDatabase(
       join(dbPath, _dbName),
+      version: 2, // 🔥 Incrementou a versão do banco
       onCreate: (db, version) {
         return db.execute(
           '''
           CREATE TABLE $_tableName(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            firebaseId TEXT,
             title TEXT,
             description TEXT,
-            isDone INTEGER
+            isDone INTEGER,
+            isSynced INTEGER
           )
           ''',
         );
       },
-      version: 1,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db
+              .execute('ALTER TABLE $_tableName ADD COLUMN firebaseId TEXT;');
+          await db.execute(
+              'ALTER TABLE $_tableName ADD COLUMN isSynced INTEGER DEFAULT 0;');
+        }
+      },
     );
   }
 
@@ -38,6 +48,16 @@ class DBHelper {
   static Future<List<Task>> getTasks() async {
     final db = await DBHelper.database();
     final data = await db.query(_tableName);
+    return data.map((item) => Task.fromMap(item)).toList();
+  }
+
+  static Future<List<Task>> getUnsyncedTasks() async {
+    final db = await DBHelper.database();
+    final data = await db.query(
+      _tableName,
+      where: 'isSynced = ?',
+      whereArgs: [0],
+    );
     return data.map((item) => Task.fromMap(item)).toList();
   }
 
