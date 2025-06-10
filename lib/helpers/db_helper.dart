@@ -10,12 +10,13 @@ class DBHelper {
     final dbPath = await getDatabasesPath();
     return openDatabase(
       join(dbPath, _dbName),
-      version: 2, // 🔥 Incrementou a versão do banco
+      version: 3,
       onCreate: (db, version) {
         return db.execute(
           '''
           CREATE TABLE $_tableName(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            uuid TEXT,
             firebaseId TEXT,
             title TEXT,
             description TEXT,
@@ -32,13 +33,16 @@ class DBHelper {
           await db.execute(
               'ALTER TABLE $_tableName ADD COLUMN isSynced INTEGER DEFAULT 0;');
         }
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE $_tableName ADD COLUMN uuid TEXT;');
+        }
       },
     );
   }
 
-  static Future<void> insert(Task task) async {
+  static Future<int> insert(Task task) async {
     final db = await DBHelper.database();
-    await db.insert(
+    return db.insert(
       _tableName,
       task.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,

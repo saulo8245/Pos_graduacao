@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/task.dart';
 
 class TaskForm extends StatefulWidget {
@@ -14,6 +15,7 @@ class _TaskFormState extends State<TaskForm> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final Uuid _uuid = const Uuid();
 
   @override
   void dispose() {
@@ -25,9 +27,11 @@ class _TaskFormState extends State<TaskForm> {
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
       final newTask = Task(
+        uuid: _uuid.v4(), // 👈 Gera o uuid único
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         isDone: false,
+        isSynced: false, // marca como não sincronizada
       );
       widget.onSubmit(newTask);
     }

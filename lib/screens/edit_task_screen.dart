@@ -37,10 +37,10 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       return;
     }
 
-    final updatedTask = Task(
+    final updatedTask = widget.task.copyWith(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
-      isDone: widget.task.isDone,
+      isSynced: false, // Marca para sincronizar depois
     );
 
     Navigator.pop(context, updatedTask);
